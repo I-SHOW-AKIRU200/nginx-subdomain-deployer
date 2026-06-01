@@ -7,16 +7,16 @@
 set -euo pipefail
 
 # ── Colours ─────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-DIM='\033[2m'
-RESET='\033[0m'
+RED=$'\e[0;31m'
+GREEN=$'\e[0;32m'
+YELLOW=$'\e[1;33m'
+CYAN=$'\e[0;36m'
+BOLD=$'\e[1m'
+DIM=$'\e[2m'
+RESET=$'\e[0m'
 
 # ── Constants ────────────────────────────────────────────────
-REPO="https://raw.githubusercontent.com/YOU/nginx-subdomain-deployer/main"
+REPO="https://raw.githubusercontent.com/I-SHOW-AKIRU200/nginx-subdomain-deployer/main"
 INSTALL_DIR="/opt/nginx-subdomain-deployer"
 SERVICE_USER="deployer"
 APP_PORT=9000
@@ -40,14 +40,16 @@ info()       { echo -e "  ${DIM}ℹ  $1${RESET}"; }
 
 press_enter() {
   echo ""
-  read -rp "  Press [Enter] to continue…" _
+  echo -n "  Press [Enter] to continue…"
+  read -r _
 }
 
 confirm() {
   # confirm "Question" → returns 0 (yes) or 1 (no)
   local msg="$1"
   while true; do
-    read -rp "  ${BOLD}${msg}${RESET} [y/N] " ans
+    echo -e "  ${BOLD}${msg}${RESET} [y/N]"
+    read -r ans
     case "${ans,,}" in
       y|yes) return 0 ;;
       n|no|"") return 1 ;;
@@ -73,7 +75,8 @@ main_menu() {
     echo -e "    ${CYAN}[2]${RESET}  Set up everything"
     echo -e "    ${CYAN}[3]${RESET}  Exit"
     echo ""
-    read -rp "  Enter choice [1-3]: " choice
+    echo -e "  Enter choice [1-3]:"
+    read -r choice
 
     case "$choice" in
       1) menu_download ;;
@@ -93,7 +96,8 @@ menu_download() {
   echo ""
 
   # Ask where to download
-  read -rp "  ${BOLD}Destination directory${RESET} [default: ${INSTALL_DIR}]: " dest_input
+  echo -e "  ${BOLD}Destination directory${RESET} [default: ${INSTALL_DIR}]:"
+  read -r dest_input
   DEST="${dest_input:-$INSTALL_DIR}"
 
   echo ""
@@ -151,7 +155,8 @@ menu_setup() {
   # ── Collect configuration ──────────────────────────────────
   # 1. Base domain
   while true; do
-    read -rp "  ${BOLD}Your base domain${RESET} (e.g. example.com): " BASE_DOMAIN
+    echo -e "  ${BOLD}Your base domain${RESET} (e.g. example.com):"
+    read -r BASE_DOMAIN
     BASE_DOMAIN="${BASE_DOMAIN,,}"
     if [[ "$BASE_DOMAIN" =~ ^[a-z0-9]([a-z0-9\-]*[a-z0-9])?(\.[a-z]{2,})+$ ]]; then
       break
@@ -161,11 +166,13 @@ menu_setup() {
 
   # 2. Wildcard cert location
   DEFAULT_CERT_DIR="/etc/letsencrypt/live/${BASE_DOMAIN}"
-  read -rp "  ${BOLD}SSL cert directory${RESET} [default: ${DEFAULT_CERT_DIR}]: " cert_input
+  echo -e "  ${BOLD}SSL cert directory${RESET} [default: ${DEFAULT_CERT_DIR}]:"
+  read -r cert_input
   CERT_DIR="${cert_input:-$DEFAULT_CERT_DIR}"
 
   # 3. App port
-  read -rp "  ${BOLD}Port for the deployer API${RESET} [default: ${APP_PORT}]: " port_input
+  echo -e "  ${BOLD}Port for the deployer API${RESET} [default: ${APP_PORT}]:"
+  read -r port_input
   APP_PORT="${port_input:-$APP_PORT}"
   if ! [[ "$APP_PORT" =~ ^[0-9]+$ ]] || ((APP_PORT < 1024 || APP_PORT > 65535)); then
     warn "Invalid port. Defaulting to 9000."
@@ -173,11 +180,13 @@ menu_setup() {
   fi
 
   # 4. Service user
-  read -rp "  ${BOLD}System user to run the service${RESET} [default: ${SERVICE_USER}]: " user_input
+  echo -e "  ${BOLD}System user to run the service${RESET} [default: ${SERVICE_USER}]:"
+  read -r user_input
   SERVICE_USER="${user_input:-$SERVICE_USER}"
 
   # 5. Install directory
-  read -rp "  ${BOLD}Install directory${RESET} [default: ${INSTALL_DIR}]: " dir_input
+  echo -e "  ${BOLD}Install directory${RESET} [default: ${INSTALL_DIR}]:"
+  read -r dir_input
   INSTALL_DIR="${dir_input:-$INSTALL_DIR}"
 
   # 6. Auto-download source?
