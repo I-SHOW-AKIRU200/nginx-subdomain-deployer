@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VPS Deployer — killersharmabot.online</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:            #f0f2f7;
+      --surface:       rgba(255,255,255,0.72);
+      --surface-2:     rgba(255,255,255,0.50);
+      --border:        rgba(200,205,220,0.70);
+      --shadow-sm:     0 2px 8px rgba(80,90,130,0.07);
+      --shadow-md:     0 8px 32px rgba(80,90,130,0.10), 0 2px 8px rgba(80,90,130,0.06);
+      --shadow-lg:     0 20px 60px rgba(80,90,130,0.13), 0 4px 16px rgba(80,90,130,0.07);
+      --text-primary:  #1a1d2e;
+      --text-secondary:#5a6080;
+      --text-muted:    #8a90b0;
+      --accent:        #4f6ef7;
+      --accent-light:  rgba(79,110,247,0.10);
+      --accent-hover:  #3d5ce8;
+      --accent-glow:   0 0 0 3px rgba(79,110,247,0.18);
+      --ok:            #22c55e;
+      --ok-bg:         rgba(34,197,94,0.08);
+      --err:           #ef4444;
+      --err-bg:        rgba(239,68,68,0.08);
+      --warn:          #f59e0b;
+      --warn-bg:       rgba(245,158,11,0.08);
+      --info-bg:       rgba(100,116,139,0.08);
+      --font-body:     'DM Sans', sans-serif;
+      --font-display:  'Syne', sans-serif;
+      --font-mono:     'DM Mono', monospace;
+      --r-sm: 10px; --r-md: 16px; --r-lg: 22px;
+      --gap: 18px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 900px 600px at 10% 0%,   rgba(200,210,255,0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 700px 500px at 85% 90%,  rgba(210,230,255,0.28) 0%, transparent 65%),
+        radial-gradient(ellipse 500px 400px at 60% 30%,  rgba(230,235,255,0.18) 0%, transparent 60%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── Login screen ── */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 36px 32px;
+    }
+
+    .login-logo {
+      width: 50px; height: 50px;
+      border-radius: var(--r-md);
+      background: var(--accent-light);
+      border: 1px solid rgba(79,110,247,0.22);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .login-logo svg { width: 24px; height: 24px; stroke-width: 1.75; }
+
+    .login-card h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .login-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    .login-field {
+      display: flex;
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      margin-bottom: 12px;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .login-field:focus-within { border-color: var(--accent); box-shadow: var(--accent-glow); }
+
+    .login-field-icon {
+      width: 42px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border);
+      align-self: stretch;
+    }
+    .login-field-icon svg { width: 15px; height: 15px; stroke-width: 2; }
+
+    .login-field input {
+      flex: 1; border: none; background: transparent;
+      padding: 0 12px; height: 44px;
+      font-family: var(--font-body); font-size: 0.88rem;
+      color: var(--text-primary); outline: none;
+    }
+
+    .btn-primary {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      height: 46px; margin-top: 8px;
+      font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+      box-shadow: 0 4px 14px rgba(79,110,247,0.28);
+    }
+    .btn-primary svg { width: 16px; height: 16px; stroke-width: 2; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .login-error {
+      display: none; align-items: center; gap: 8px;
+      margin-top: 12px; padding: 10px 14px;
+      border-radius: var(--r-sm);
+      background: var(--err-bg); border: 1px solid rgba(239,68,68,0.22);
+      font-size: 0.83rem; color: var(--err);
+    }
+    .login-error.visible { display: flex; }
+    .login-error svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ── Main app ── */
+    #appScreen { display: none; padding: 40px 20px 80px; }
+
+    .bento-grid {
+      display: grid;
+      max-width: 960px;
+      margin: 0 auto;
+      gap: var(--gap);
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "header  header"
+        "deploy  deploy"
+        "list    list"
+        "log     log";
+    }
+
+    @media (max-width: 640px) {
+      .bento-grid { grid-template-columns: 1fr; grid-template-areas: "header" "deploy" "list" "log"; }
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-md);
+      padding: 28px 30px;
+      transition: box-shadow 0.2s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-lg); }
+
+    /* Header */
+    .card--header {
+      grid-area: header;
+      display: flex; align-items: center; gap: 22px; padding: 26px 30px;
+    }
+    .header-icon-wrap {
+      flex-shrink: 0; width: 54px; height: 54px;
+      border-radius: var(--r-md);
+      background: var(--accent-light); border: 1px solid rgba(79,110,247,0.20);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .header-icon-wrap svg { width: 26px; height: 26px; stroke-width: 1.75; }
+    .header-text h1 {
+      font-family: var(--font-display); font-size: 1.55rem; font-weight: 700;
+      line-height: 1.2; letter-spacing: -0.02em;
+    }
+    .header-text p { margin-top: 4px; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+    .domain-badge {
+      margin-left: auto; flex-shrink: 0;
+      background: var(--accent-light); border: 1px solid rgba(79,110,247,0.22);
+      border-radius: 100px; padding: 5px 14px;
+      font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); white-space: nowrap;
+    }
+    .logout-btn {
+      margin-left: 12px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 6px;
+      background: var(--err-bg); border: 1px solid rgba(239,68,68,0.22);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 0.78rem; font-weight: 600; color: var(--err);
+      cursor: pointer; transition: background 0.18s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.14); }
+    .logout-btn svg { width: 13px; height: 13px; }
+
+    @media (max-width: 640px) { .domain-badge, .logout-btn { display: none; } }
+
+    /* Deploy card */
+    .card--deploy { grid-area: deploy; }
+    .card-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 18px;
+    }
+
+    .input-row { display: grid; grid-template-columns: 1fr 220px; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 600px) { .input-row { grid-template-columns: 1fr; } }
+
+    .field {
+      display: flex; align-items: center;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); overflow: hidden;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .field:focus-within { border-color: var(--accent); box-shadow: var(--accent-glow); }
+    .field-icon {
+      flex-shrink: 0; width: 42px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); border-right: 1px solid var(--border); align-self: stretch;
+    }
+    .field-icon svg { width: 15px; height: 15px; stroke-width: 2; }
+    .field-subdomain { flex: 1; display: flex; align-items: center; }
+    .field-subdomain input { flex: 1; min-width: 0; border: none; background: transparent; padding: 0 6px 0 12px; height: 44px; font-family: var(--font-mono); font-size: 0.88rem; color: var(--text-primary); outline: none; }
+    .field-suffix { padding-right: 12px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+    .field input[type="number"] { flex: 1; border: none; background: transparent; padding: 0 12px; height: 44px; font-family: var(--font-mono); font-size: 0.88rem; color: var(--text-primary); outline: none; }
+    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"] { -moz-appearance: textfield; }
+    .field-hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; padding-left: 2px; }
+
+    .btn-deploy {
+      display: inline-flex; align-items: center; gap: 9px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      padding: 0 26px; height: 46px;
+      font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+      box-shadow: 0 4px 14px rgba(79,110,247,0.28);
+    }
+    .btn-deploy svg { width: 17px; height: 17px; stroke-width: 2; }
+    .btn-deploy:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 6px 20px rgba(79,110,247,0.38); transform: translateY(-1px); }
+    .btn-deploy:active:not(:disabled) { transform: translateY(0); }
+    .btn-deploy:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .validation-error {
+      display: none; align-items: center; gap: 8px;
+      margin-bottom: 14px; padding: 10px 14px;
+      border-radius: var(--r-sm); background: var(--err-bg);
+      border: 1px solid rgba(239,68,68,0.22);
+      font-size: 0.84rem; color: var(--err);
+    }
+    .validation-error.visible { display: flex; }
+    .validation-error svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* Deployments list */
+    .card--list { grid-area: list; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .list-header .card-label { margin-bottom: 0; }
+    .refresh-btn {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 100px; padding: 4px 12px;
+      font-size: 0.78rem; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .refresh-btn:hover { background: rgba(79,110,247,0.08); color: var(--accent); }
+    .refresh-btn svg { width: 13px; height: 13px; }
+
+    .deployment-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .deployment-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      transition: border-color 0.15s;
+      animation: fadeSlideIn 0.2s ease both;
+    }
+    .deployment-row:hover { border-color: rgba(79,110,247,0.25); }
+
+    .dep-status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ok); flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+    }
+
+    .dep-info { flex: 1; min-width: 0; }
+    .dep-fqdn { font-family: var(--font-mono); font-size: 0.84rem; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dep-fqdn a { color: var(--accent); text-decoration: none; }
+    .dep-fqdn a:hover { text-decoration: underline; }
+    .dep-port { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; font-family: var(--font-mono); }
+
+    .btn-delete {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--err-bg); border: 1px solid rgba(239,68,68,0.20);
+      border-radius: var(--r-sm); padding: 6px 12px;
+      font-size: 0.78rem; font-weight: 600; color: var(--err);
+      cursor: pointer; flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-delete:hover { background: rgba(239,68,68,0.14); border-color: rgba(239,68,68,0.35); }
+    .btn-delete svg { width: 13px; height: 13px; }
+    .btn-delete:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .list-empty {
+      text-align: center; padding: 28px 16px;
+      font-size: 0.85rem; color: var(--text-muted);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .list-empty svg { width: 28px; height: 28px; opacity: 0.4; }
+
+    /* Log card */
+    .card--log { grid-area: log; display: none; }
+    .card--log.visible { display: block; }
+    .log-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .log-header .card-label { margin-bottom: 0; }
+
+    .result-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 100px;
+      font-size: 0.78rem; font-weight: 600;
+    }
+    .result-badge svg { width: 13px; height: 13px; }
+    .result-badge--ok  { background: var(--ok-bg);  color: var(--ok);  border: 1px solid rgba(34,197,94,0.25); }
+    .result-badge--err { background: var(--err-bg); color: var(--err); border: 1px solid rgba(239,68,68,0.25); }
+
+    .step-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .step-row {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 11px 14px; border-radius: var(--r-sm); border: 1px solid transparent;
+      animation: fadeSlideIn 0.25s ease both;
+    }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-row--ok   { background: var(--ok-bg);   border-color: rgba(34,197,94,0.18); }
+    .step-row--err  { background: var(--err-bg);  border-color: rgba(239,68,68,0.18); }
+    .step-row--info { background: var(--info-bg); border-color: rgba(100,116,139,0.18); }
+    .step-row--loading { background: rgba(79,110,247,0.05); border-color: rgba(79,110,247,0.15); }
+
+    .step-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .step-icon svg { width: 15px; height: 15px; stroke-width: 2.2; }
+    .step-row--ok   .step-icon { color: var(--ok); }
+    .step-row--err  .step-icon { color: var(--err); }
+    .step-row--info .step-icon { color: #64748b; }
+
+    .step-content { flex: 1; min-width: 0; }
+    .step-name { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+    .step-msg { font-size: 0.84rem; color: var(--text-primary); line-height: 1.45; word-break: break-word; font-family: var(--font-mono); }
+
+    .success-block {
+      margin-top: 16px; padding: 18px 20px; border-radius: var(--r-md);
+      background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(79,110,247,0.08) 100%);
+      border: 1px solid rgba(34,197,94,0.22);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .success-block-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.25); display: flex; align-items: center; justify-content: center; color: var(--ok); flex-shrink: 0; }
+    .success-block-icon svg { width: 20px; height: 20px; }
+    .success-block-text p { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 3px; }
+    .success-block-text a { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 500; color: var(--accent); text-decoration: none; word-break: break-all; }
+    .success-block-text a:hover { text-decoration: underline; }
+
+    .spinner { width: 15px; height: 15px; border: 2px solid rgba(79,110,247,0.25); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Confirm modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(20,25,50,0.35);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      backdrop-filter: blur(20px) saturate(1.5);
+      -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
+      padding: 28px 28px 24px; max-width: 380px; width: 90%;
+      animation: modalIn 0.2s ease both;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .modal-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--err-bg); border: 1px solid rgba(239,68,68,0.25); display: flex; align-items: center; justify-content: center; color: var(--err); margin-bottom: 16px; }
+    .modal-icon svg { width: 22px; height: 22px; }
+    .modal h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .modal p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
+    .modal p strong { font-family: var(--font-mono); color: var(--text-primary); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    .btn-cancel {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 0 18px; height: 40px;
+      font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer; transition: background 0.15s;
+    }
+    .btn-cancel:hover { background: rgba(100,116,139,0.12); }
+
+    .btn-confirm-delete {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--err); border: none;
+      border-radius: var(--r-sm); padding: 0 18px; height: 40px;
+      font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
+      color: #fff; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(239,68,68,0.25);
+      transition: background 0.15s, transform 0.12s;
+    }
+    .btn-confirm-delete:hover { background: #dc2626; transform: translateY(-1px); }
+    .btn-confirm-delete svg { width: 14px; height: 14px; }
+
+    .footer { text-align: center; margin-top: 32px; font-size: 0.76rem; color: var(--text-muted); letter-spacing: 0.02em; }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       LOGIN SCREEN
+       ================================================================ -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo"><i data-lucide="shield-check"></i></div>
+      <h2>VPS Deployer</h2>
+      <p>Sign in to manage deployments on killersharmabot.online</p>
+
+      <div class="login-field">
+        <div class="login-field-icon"><i data-lucide="user"></i></div>
+        <input type="text" id="loginUser" placeholder="Username" autocomplete="username" />
+      </div>
+      <div class="login-field">
+        <div class="login-field-icon"><i data-lucide="lock"></i></div>
+        <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" />
+      </div>
+
+      <div class="login-error" id="loginError">
+        <i data-lucide="alert-circle"></i>
+        <span id="loginErrorMsg"></span>
+      </div>
+
+      <button class="btn-primary" id="loginBtn" onclick="handleLogin()">
+        <i data-lucide="log-in"></i>
+        Sign In
+      </button>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MAIN APP SCREEN
+       ================================================================ -->
+  <div id="appScreen">
+    <div class="bento-grid">
+
+      <!-- Header -->
+      <div class="card card--header">
+        <div class="header-icon-wrap"><i data-lucide="rocket"></i></div>
+        <div class="header-text">
+          <h1>Instant Bot Deployment</h1>
+          <p>Provision a TLS-secured Nginx reverse proxy for any local application in seconds.</p>
+        </div>
+        <span class="domain-badge">*.killersharmabot.online</span>
+        <button class="logout-btn" onclick="handleLogout()">
+          <i data-lucide="log-out"></i> Sign out
+        </button>
+      </div>
+
+      <!-- Deploy card -->
+      <div class="card card--deploy">
+        <p class="card-label">New Deployment</p>
+
+        <div class="input-row">
+          <div class="field">
+            <div class="field-icon"><i data-lucide="globe"></i></div>
+            <div class="field-subdomain">
+              <input type="text" id="subdomain" placeholder="bot1" maxlength="63" autocomplete="off" spellcheck="false" />
+              <span class="field-suffix">.killersharmabot.online</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-icon"><i data-lucide="server"></i></div>
+            <input type="number" id="port" placeholder="8080" min="1024" max="65535" />
+          </div>
+        </div>
+
+        <p class="field-hint">Subdomain: alphanumeric and hyphens only. Port: 1024 – 65535.</p>
+
+        <div class="validation-error" id="valError">
+          <i data-lucide="alert-triangle"></i>
+          <span id="valErrorMsg"></span>
+        </div>
+
+        <button class="btn-deploy" id="deployBtn" onclick="handleDeploy()">
+          <i data-lucide="package-plus"></i>
+          Deploy Now
+        </button>
+      </div>
+
+      <!-- Deployments list -->
+      <div class="card card--list">
+        <div class="list-header">
+          <p class="card-label">Active Deployments</p>
+          <button class="refresh-btn" onclick="loadDeployments()">
+            <i data-lucide="refresh-cw"></i> Refresh
+          </button>
+        </div>
+        <div class="deployment-list" id="deploymentList">
+          <div class="list-empty"><i data-lucide="inbox"></i> Loading deployments...</div>
+        </div>
+      </div>
+
+      <!-- Log card -->
+      <div class="card card--log" id="logCard">
+        <div class="log-header">
+          <p class="card-label">Operation Log</p>
+          <span class="result-badge" id="resultBadge" style="display:none"></span>
+        </div>
+        <div class="step-list" id="stepList"></div>
+        <div class="success-block" id="successBlock" style="display:none">
+          <div class="success-block-icon"><i data-lucide="check-circle-2"></i></div>
+          <div class="success-block-text">
+            <p>Your application is live at</p>
+            <a id="liveUrl" href="#" target="_blank" rel="noopener"></a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="footer">VPS Deployer &mdash; killersharmabot.online</p>
+  </div>
+
+  <!-- ================================================================
+       DELETE CONFIRM MODAL
+       ================================================================ -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <div class="modal-icon"><i data-lucide="trash-2"></i></div>
+      <h3>Delete Deployment</h3>
+      <p>This will remove the Nginx config for <strong id="modalFqdn"></strong> and reload Nginx. The action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeDeleteModal()">
+          <i data-lucide="x"></i> Cancel
+        </button>
+        <button class="btn-confirm-delete" id="confirmDeleteBtn" onclick="confirmDelete()">
+          <i data-lucide="trash-2"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Init Lucide icons ──────────────────────────────────────────────
+    lucide.createIcons();
+
+    // ── Icon helpers ───────────────────────────────────────────────────
+    function toCamelCase(str) {
+      return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+    }
+    function icon(name, sw = 2.2) {
+      const el = lucide.createElement(lucide[toCamelCase(name)]);
+      el.setAttribute('stroke-width', String(sw));
+      return el;
+    }
+
+    // ── State ──────────────────────────────────────────────────────────
+    let _pendingDeleteSubdomain = null;
+
+    // ── Escape helper ──────────────────────────────────────────────────
+    function esc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ==================================================================
+    // AUTH
+    // ==================================================================
+
+    async function checkAuth() {
+      const res = await fetch('/auth/check');
+      const data = await res.json();
+      if (data.authenticated) {
+        showApp();
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appScreen').style.display = 'none';
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      loadDeployments();
+    }
+
+    async function handleLogin() {
+      const username = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value;
+      const btn = document.getElementById('loginBtn');
+      const errEl = document.getElementById('loginError');
+      errEl.classList.remove('visible');
+
+      if (!username || !password) {
+        document.getElementById('loginErrorMsg').textContent = 'Please enter username and password.';
+        errEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password }),
+        });
+        if (res.ok) {
+          document.getElementById('loginPass').value = '';
+          showApp();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          document.getElementById('loginErrorMsg').textContent =
+            data.detail || (res.status === 429 ? 'Too many attempts. Wait 60 seconds.' : 'Invalid credentials.');
+          errEl.classList.add('visible');
+        }
+      } catch (e) {
+        document.getElementById('loginErrorMsg').textContent = 'Cannot reach server: ' + e.message;
+        errEl.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function handleLogout() {
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+      showLogin();
+    }
+
+    // Enter key on login fields
+    ['loginUser','loginPass'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+    });
+
+    // ==================================================================
+    // DEPLOYMENTS LIST
+    // ==================================================================
+
+    async function loadDeployments() {
+      const listEl = document.getElementById('deploymentList');
+      listEl.innerHTML = '<div class="list-empty"><div class="spinner" style="margin:0 auto"></div></div>';
+
+      try {
+        const res = await fetch('/list', { credentials: 'include' });
+        if (res.status === 401) { showLogin(); return; }
+        const data = await res.json();
+        renderDeployments(data.deployments || []);
+      } catch (e) {
+        listEl.innerHTML = `<div class="list-empty"><span style="color:var(--err)">Failed to load: ${esc(e.message)}</span></div>`;
+      }
+    }
+
+    function renderDeployments(deployments) {
+      const listEl = document.getElementById('deploymentList');
+      if (deployments.length === 0) {
+        listEl.innerHTML = '';
+        const empty = document.createElement('div');
+        empty.className = 'list-empty';
+        empty.appendChild(icon('inbox'));
+        empty.appendChild(document.createTextNode(' No active deployments yet.'));
+        listEl.appendChild(empty);
+        return;
+      }
+
+      listEl.innerHTML = '';
+      deployments.forEach(dep => {
+        const row = document.createElement('div');
+        row.className = 'deployment-row';
+        row.id = `dep-row-${dep.subdomain}`;
+
+        const dot = document.createElement('div');
+        dot.className = 'dep-status-dot';
+
+        const info = document.createElement('div');
+        info.className = 'dep-info';
+        info.innerHTML = `
+          <div class="dep-fqdn">
+            <a href="https://${esc(dep.fqdn)}" target="_blank" rel="noopener">${esc(dep.fqdn)}</a>
+          </div>
+          <div class="dep-port">${dep.port ? 'port ' + dep.port : 'port unknown'}</div>
+        `;
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-delete';
+        delBtn.appendChild(icon('trash-2'));
+        delBtn.appendChild(document.createTextNode(' Delete'));
+        delBtn.onclick = () => openDeleteModal(dep.subdomain, dep.fqdn);
+
+        row.appendChild(dot);
+        row.appendChild(info);
+        row.appendChild(delBtn);
+        listEl.appendChild(row);
+      });
+    }
+
+    // ==================================================================
+    // DELETE FLOW
+    // ==================================================================
+
+    function openDeleteModal(subdomain, fqdn) {
+      _pendingDeleteSubdomain = subdomain;
+      document.getElementById('modalFqdn').textContent = fqdn;
+      document.getElementById('deleteModal').classList.add('visible');
+      lucide.createIcons({ nodes: [document.getElementById('deleteModal')] });
+    }
+
+    function closeDeleteModal() {
+      _pendingDeleteSubdomain = null;
+      document.getElementById('deleteModal').classList.remove('visible');
+    }
+
+    async function confirmDelete() {
+      const subdomain = _pendingDeleteSubdomain;
+      if (!subdomain) return;
+
+      closeDeleteModal();
+      initLogCard('Deleting deployment...');
+
+      try {
+        const res = await fetch(`/delete/${encodeURIComponent(subdomain)}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+
+        if (res.status === 401) { showLogin(); return; }
+
+        const data = await res.json();
+        (data.steps || []).forEach(appendStepRow);
+        setResultBadge(data.success);
+
+        if (data.success) {
+          // Remove the row from the list immediately
+          const row = document.getElementById(`dep-row-${subdomain}`);
+          if (row) row.remove();
+          // If list is now empty, show empty state
+          const listEl = document.getElementById('deploymentList');
+          if (listEl.children.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'list-empty';
+            empty.appendChild(icon('inbox'));
+            empty.appendChild(document.createTextNode(' No active deployments yet.'));
+            listEl.appendChild(empty);
+          }
+        }
+      } catch (e) {
+        appendStepRow({ step: 'network', status: 'error', message: e.message });
+        setResultBadge(false);
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) closeDeleteModal();
+    });
+
+    // ==================================================================
+    // DEPLOY FLOW
+    // ==================================================================
+
+    function validateInputs() {
+      const subdomain = document.getElementById('subdomain').value.trim().toLowerCase();
+      const portRaw   = document.getElementById('port').value.trim();
+      const errEl = document.getElementById('valError');
+
+      if (!subdomain) { showValError('Please enter a subdomain prefix.'); return null; }
+      if (!/^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$|^[a-z0-9]$/.test(subdomain)) {
+        showValError('Only lowercase letters, digits, and hyphens allowed.'); return null;
+      }
+      if (!portRaw) { showValError('Please enter a local port number.'); return null; }
+      const port = parseInt(portRaw, 10);
+      if (isNaN(port) || port < 1024 || port > 65535) {
+        showValError('Port must be between 1024 and 65535.'); return null;
+      }
+      errEl.classList.remove('visible');
+      return { subdomain, port };
+    }
+
+    function showValError(msg) {
+      document.getElementById('valErrorMsg').textContent = msg;
+      document.getElementById('valError').classList.add('visible');
+    }
+
+    async function handleDeploy() {
+      const inputs = validateInputs();
+      if (!inputs) return;
+
+      const btn = document.getElementById('deployBtn');
+      btn.disabled = true;
+      initLogCard('Contacting deployment service...');
+
+      try {
+        const res = await fetch('/deploy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ subdomain_prefix: inputs.subdomain, local_port: inputs.port }),
+        });
+
+        removeLoadingRow();
+
+        if (res.status === 401) { showLogin(); return; }
+
+        if (!res.ok) {
+          let detail = `Server error ${res.status}`;
+          try {
+            const err = await res.json();
+            if (Array.isArray(err.detail)) detail = err.detail.map(e => e.msg).join('; ');
+            else if (err.detail) detail = String(err.detail);
+          } catch (_) {}
+          appendStepRow({ step: 'request', status: 'error', message: detail });
+          setResultBadge(false);
+          return;
+        }
+
+        const data = await res.json();
+        (data.steps || []).forEach(appendStepRow);
+        setResultBadge(data.success);
+
+        if (data.success && data.fqdn) {
+          showSuccessBlock(data.fqdn);
+          loadDeployments(); // refresh the list
+        }
+      } catch (e) {
+        removeLoadingRow();
+        appendStepRow({ step: 'network', status: 'error', message: e.message });
+        setResultBadge(false);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    ['subdomain','port'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') handleDeploy(); });
+    });
+
+    // ==================================================================
+    // LOG CARD HELPERS
+    // ==================================================================
+
+    let _loadingRow = null;
+
+    function initLogCard(loadingMsg) {
+      const card = document.getElementById('logCard');
+      card.classList.add('visible');
+      document.getElementById('stepList').innerHTML = '';
+      document.getElementById('successBlock').style.display = 'none';
+      const badge = document.getElementById('resultBadge');
+      badge.style.display = 'none'; badge.className = 'result-badge'; badge.innerHTML = '';
+
+      const row = document.createElement('div');
+      row.className = 'step-row step-row--loading';
+      row.id = '_loadingRow';
+      row.innerHTML = `<div class="step-icon"><div class="spinner"></div></div><div class="step-content"><div class="step-msg">${esc(loadingMsg)}</div></div>`;
+      document.getElementById('stepList').appendChild(row);
+      _loadingRow = row;
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function removeLoadingRow() {
+      if (_loadingRow && _loadingRow.parentNode) _loadingRow.parentNode.removeChild(_loadingRow);
+      _loadingRow = null;
+    }
+
+    function appendStepRow(step) {
+      const cls = step.status === 'ok' ? 'ok' : step.status === 'error' ? 'err' : 'info';
+      const iconName = step.status === 'ok' ? 'check-circle' : step.status === 'error' ? 'x-circle' : 'info';
+
+      const row = document.createElement('div');
+      row.className = `step-row step-row--${cls}`;
+
+      const iconWrap = document.createElement('div');
+      iconWrap.className = 'step-icon';
+      iconWrap.appendChild(icon(iconName));
+
+      const content = document.createElement('div');
+      content.className = 'step-content';
+      content.innerHTML = `<div class="step-name">${esc(step.step.replace(/_/g,' '))}</div><div class="step-msg">${esc(step.message)}</div>`;
+
+      row.appendChild(iconWrap);
+      row.appendChild(content);
+      document.getElementById('stepList').appendChild(row);
+      row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function setResultBadge(success) {
+      const badge = document.getElementById('resultBadge');
+      badge.style.display = 'inline-flex';
+      badge.classList.add(success ? 'result-badge--ok' : 'result-badge--err');
+      badge.appendChild(icon(success ? 'check-circle' : 'x-circle', 2));
+      badge.appendChild(document.createTextNode(success ? ' Success' : ' Failed'));
+    }
+
+    function showSuccessBlock(fqdn) {
+      const block = document.getElementById('successBlock');
+      const url = `https://${fqdn}`;
+      document.getElementById('liveUrl').textContent = url;
+      document.getElementById('liveUrl').href = url;
+      block.style.display = 'flex';
+      lucide.createIcons({ nodes: [block] });
+    }
+
+    // ==================================================================
+    // BOOT
+    // ==================================================================
+    checkAuth();
+  </script>
+</body>
+</html>
